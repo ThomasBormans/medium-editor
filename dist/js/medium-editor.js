@@ -477,7 +477,7 @@ if (typeof module === 'object') {
 
                 clearTimeout(timer);
                 timer = setTimeout(function () {
-                    self.checkSelection();
+                    self.checkSelection(e);
                 }, self.options.delay);
             };
 
@@ -490,23 +490,23 @@ if (typeof module === 'object') {
             return this;
         },
 
-        checkSelection: function () {
+        checkSelection: function (e) {
             var newSelection,
                 selectionElement;
 
             if (this.keepToolbarAlive !== true && !this.options.disableToolbar) {
                 newSelection = window.getSelection();
-                if (newSelection.toString().trim() === '' ||
-                    (this.options.allowMultiParagraphSelection === false && this.hasMultiParagraphs())) {
+                // if (newSelection.toString().trim() === '' ||
+                //     (this.options.allowMultiParagraphSelection === false && this.hasMultiParagraphs())) {
+                    // this.hideToolbarActions();
+                // } else {
+                selectionElement = this.getSelectionElement();
+                if (!selectionElement || selectionElement.getAttribute('data-disable-toolbar')) {
                     this.hideToolbarActions();
                 } else {
-                    selectionElement = this.getSelectionElement();
-                    if (!selectionElement || selectionElement.getAttribute('data-disable-toolbar')) {
-                        this.hideToolbarActions();
-                    } else {
-                        this.checkSelectionElement(newSelection, selectionElement);
-                    }
+                    this.checkSelectionElement(newSelection, selectionElement, e);
                 }
+                // }
             }
             return this;
         },
@@ -526,14 +526,14 @@ if (typeof module === 'object') {
             return (hasMultiParagraphs ? hasMultiParagraphs.length : 0);
         },
 
-        checkSelectionElement: function (newSelection, selectionElement) {
+        checkSelectionElement: function (newSelection, selectionElement, e) {
             var i;
             this.selection = newSelection;
             this.selectionRange = this.selection.getRangeAt(0);
             for (i = 0; i < this.elements.length; i += 1) {
                 if (this.elements[i] === selectionElement) {
                     this.setToolbarButtonStates()
-                        .setToolbarPosition()
+                        .setToolbarPosition(e)
                         .showToolbarActions();
                     return;
                 }
@@ -574,12 +574,15 @@ if (typeof module === 'object') {
             return result;
         },
 
-        setToolbarPosition: function () {
+        setToolbarPosition: function (e) {
             var buttonHeight = 50,
                 selection = window.getSelection(),
                 range = selection.getRangeAt(0),
-                boundary = range.getBoundingClientRect(),
-                defaultLeft = (this.options.diffLeft) - (this.toolbar.offsetWidth / 2),
+                boundary = range.getBoundingClientRect();
+            if(boundary.left === 0 && boundary.right === 0) {
+                boundary = {bottom: e.y, height: 20, left: e.x, right: e.x, top: e.y, width: 1};
+            }
+            var defaultLeft = (this.options.diffLeft) - (this.toolbar.offsetWidth / 2),
                 middleBoundary = (boundary.left + boundary.right) / 2,
                 halfOffsetWidth = this.toolbar.offsetWidth / 2;
             if (boundary.top < buttonHeight) {
@@ -644,7 +647,7 @@ if (typeof module === 'object') {
                     e.preventDefault();
                     e.stopPropagation();
                     if (self.selection === undefined) {
-                        self.checkSelection();
+                        self.checkSelection(e);
                     }
                     if (this.className.indexOf(self.options.activeButtonClass) > -1) {
                         this.classList.remove(self.options.activeButtonClass);
@@ -835,7 +838,7 @@ if (typeof module === 'object') {
             });
             this.anchorInput.addEventListener('blur', function () {
                 self.keepToolbarAlive = false;
-                self.checkSelection();
+                self.checkSelection(null);
             });
             linkCancel.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -1053,7 +1056,7 @@ if (typeof module === 'object') {
             if (this.options.targetBlank) {
                 this.setTargetBlank();
             }
-            this.checkSelection();
+            this.checkSelection(null);
             this.showToolbarActions();
             input.value = '';
         },
