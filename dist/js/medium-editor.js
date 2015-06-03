@@ -95,7 +95,7 @@ if (typeof module === 'object') {
             allowMultiParagraphSelection: true,
             anchorInputPlaceholder: 'Paste or type a link',
             anchorPreviewHideDelay: 500,
-            buttons: ['bold', 'italic', 'underline', 'anchor', 'header1', 'header2', 'quote', 'contact'],
+            buttons: ['bold', 'italic', 'underline', 'anchor', 'header1', 'header2', 'quote', 'contact', 'movie'],
             buttonLabels: false,
             checkLinkFormat: false,
             cleanPastedHTML: false,
@@ -326,7 +326,8 @@ if (typeof module === 'object') {
                     'pre': '<button class="medium-editor-action medium-editor-action-pre" data-action="append-pre" data-element="pre">' + buttonLabels.pre + '</button>',
                     'indent': '<button class="medium-editor-action medium-editor-action-indent" data-action="indent" data-element="ul">' + buttonLabels.indent + '</button>',
                     'outdent': '<button class="medium-editor-action medium-editor-action-outdent" data-action="outdent" data-element="ul">' + buttonLabels.outdent + '</button>',
-                    'contact': '<button class="medium-editor-action medium-editor-action-contact" data-action="contact" data-element="img">' + buttonLabels.contact + '</button>'
+                    'contact': '<button class="medium-editor-action medium-editor-action-contact" data-action="contact" data-element="img">' + buttonLabels.contact + '</button>',
+                    'movie': '<button class="medium-editor-action medium-editor-action-movie" data-action="movie" data-element="img">' + buttonLabels.movie + '</button>'
                 };
             return buttonTemplates[btnType] || false;
         },
@@ -351,7 +352,8 @@ if (typeof module === 'object') {
                     'pre': '<b>0101</b>',
                     'indent': '<b>&rarr;</b>',
                     'outdent': '<b>&larr;</b>',
-                    'contact': '<b>contact</b>'
+                    'contact': '<b>contact</b>',
+                    'movie': '<b>movie</b>'
                 };
             if (buttonLabelType === 'fontawesome') {
                 customButtonLabels = {
@@ -369,6 +371,7 @@ if (typeof module === 'object') {
                     'indent': '<i class="fa fa-indent"></i>',
                     'outdent': '<i class="fa fa-outdent"></i>',
                     'contact': '<i class="fa fa-phone"></i>'
+                    'movie': '<i class="fa fa-film"></i>'
                 };
             } else if (typeof buttonLabelType === 'object') {
                 customButtonLabels = buttonLabelType;
@@ -678,6 +681,8 @@ if (typeof module === 'object') {
                 document.execCommand('insertImage', false, window.getSelection());
             } else if (action === 'contact') {
                 document.execCommand('insertHtml', null, '[CONTACT]');
+            } else if (action === 'movie') {
+                document.execCommand('insertHtml', null, '[MOVIE]');
             } else {
                 document.execCommand(action, false, null);
                 this.setToolbarPosition();
