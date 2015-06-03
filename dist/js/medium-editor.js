@@ -370,7 +370,7 @@ if (typeof module === 'object') {
                     'pre': '<i class="fa fa-code fa-lg"></i>',
                     'indent': '<i class="fa fa-indent"></i>',
                     'outdent': '<i class="fa fa-outdent"></i>',
-                    'contact': '<i class="fa fa-phone"></i>'
+                    'contact': '<i class="fa fa-phone"></i>',
                     'movie': '<i class="fa fa-film"></i>'
                 };
             } else if (typeof buttonLabelType === 'object') {
