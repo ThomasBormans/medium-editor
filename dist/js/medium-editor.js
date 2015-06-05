@@ -101,7 +101,7 @@ if (typeof module === 'object') {
             cleanPastedHTML: false,
             delay: 0,
             diffLeft: 0,
-            diffTop: -10,
+            diffTop: -15,
             disableReturn: false,
             disableDoubleReturn: false,
             disableToolbar: false,
@@ -507,6 +507,7 @@ if (typeof module === 'object') {
                 else if (newSelection.focusNode.nodeValue == null) {
                     this.hideToolbarActions();
                 }
+
                 else {
                     this.checkSelectionElement(newSelection, selectionElement, e);
                 }
@@ -583,6 +584,7 @@ if (typeof module === 'object') {
                 selection = window.getSelection(),
                 range = selection.getRangeAt(0),
                 boundary = range.getBoundingClientRect();
+
             if(boundary.left === 0 && boundary.right === 0) {
                 boundary = {bottom: e.y, height: 20, left: e.x, right: e.x, top: e.y, width: 1};
             }
@@ -592,11 +594,11 @@ if (typeof module === 'object') {
             if (boundary.top < buttonHeight) {
                 this.toolbar.classList.add('medium-toolbar-arrow-over');
                 this.toolbar.classList.remove('medium-toolbar-arrow-under');
-                this.toolbar.style.top = buttonHeight + boundary.bottom - this.options.diffTop + window.pageYOffset - this.toolbar.offsetHeight - 5 + 'px'; //-5 to offset toolbar from cursor
+                this.toolbar.style.top = buttonHeight + boundary.bottom - this.options.diffTop + window.pageYOffset - this.toolbar.offsetHeight + 'px';
             } else {
                 this.toolbar.classList.add('medium-toolbar-arrow-under');
                 this.toolbar.classList.remove('medium-toolbar-arrow-over');
-                this.toolbar.style.top = boundary.top + this.options.diffTop + window.pageYOffset - this.toolbar.offsetHeight - 5 + 'px'; //-5 to offset toolbar from cursor
+                this.toolbar.style.top = boundary.top + this.options.diffTop + window.pageYOffset - this.toolbar.offsetHeight + 'px';
             }
             if (middleBoundary < halfOffsetWidth) {
                 this.toolbar.style.left = defaultLeft + halfOffsetWidth + 'px';
