@@ -493,7 +493,6 @@ if (typeof module === 'object') {
         checkSelection: function (e) {
             var newSelection,
                 selectionElement;
-
             if (this.keepToolbarAlive !== true && !this.options.disableToolbar) {
                 newSelection = window.getSelection();
                 // if (newSelection.toString().trim() === '' ||
@@ -503,7 +502,12 @@ if (typeof module === 'object') {
                 selectionElement = this.getSelectionElement();
                 if (!selectionElement || selectionElement.getAttribute('data-disable-toolbar')) {
                     this.hideToolbarActions();
-                } else {
+                } 
+                //if no text in newSelection, don't show the toolbar
+                else if (newSelection.focusNode.nodeValue == null) {
+                    this.hideToolbarActions();
+                }
+                else {
                     this.checkSelectionElement(newSelection, selectionElement, e);
                 }
                 // }
@@ -588,11 +592,11 @@ if (typeof module === 'object') {
             if (boundary.top < buttonHeight) {
                 this.toolbar.classList.add('medium-toolbar-arrow-over');
                 this.toolbar.classList.remove('medium-toolbar-arrow-under');
-                this.toolbar.style.top = buttonHeight + boundary.bottom - this.options.diffTop + window.pageYOffset - this.toolbar.offsetHeight + 'px';
+                this.toolbar.style.top = buttonHeight + boundary.bottom - this.options.diffTop + window.pageYOffset - this.toolbar.offsetHeight - 5 + 'px'; //-5 to offset toolbar from cursor
             } else {
                 this.toolbar.classList.add('medium-toolbar-arrow-under');
                 this.toolbar.classList.remove('medium-toolbar-arrow-over');
-                this.toolbar.style.top = boundary.top + this.options.diffTop + window.pageYOffset - this.toolbar.offsetHeight + 'px';
+                this.toolbar.style.top = boundary.top + this.options.diffTop + window.pageYOffset - this.toolbar.offsetHeight - 5 + 'px'; //-5 to offset toolbar from cursor
             }
             if (middleBoundary < halfOffsetWidth) {
                 this.toolbar.style.left = defaultLeft + halfOffsetWidth + 'px';
