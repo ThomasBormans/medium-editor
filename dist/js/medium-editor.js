@@ -97,10 +97,15 @@ if (typeof module === 'object') {
         if (window.getSelection) {
             // IE9 and non-IE
             sel = window.getSelection();
+
             if (sel.getRangeAt && sel.rangeCount) {
                 range = sel.getRangeAt(0);
-                range.deleteContents();
 
+                if (sel.type != "Range"){
+                    range.deleteContents();
+                }
+
+                
                 // Range.createContextualFragment() would be useful here but is
                 // non-standard and not supported in all browsers (IE9, for one)
                 var el = document.createElement("div");
@@ -625,11 +630,11 @@ if (typeof module === 'object') {
                 boundary = range.getBoundingClientRect();
 
             //if nothing is selected, draw the toolbar at cursor
-            if (range.endOffset - range.startOffset == 0 ) {
+            if (range.endOffset - range.startOffset == 0 && range.collapsed == true) {
 
                 //first, inject a span at the caret
                 pasteHtmlAtCaret('<span id="positionOfCaret"></span>');
-                
+
                 //now get X and Y position of that span & set as boundary
                 var posEl = document.getElementById('positionOfCaret');
                 var posElBoundary = posEl.getBoundingClientRect();
