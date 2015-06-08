@@ -97,7 +97,7 @@ if (typeof module === 'object') {
         if (window.getSelection) {
             // IE9 and non-IE
             sel = window.getSelection();
-
+            
             if (sel.getRangeAt && sel.rangeCount) {
                 range = sel.getRangeAt(0);
 
@@ -562,7 +562,7 @@ if (typeof module === 'object') {
 
         clickingIntoArchorForm: function (e) {
             var self = this;
-            if (e.type && e.type.toLowerCase() === 'blur' && e.relatedTarget && e.relatedTarget === e.anchorInput ) {
+            if (e.type && e.type.toLowerCase() === 'blur' && e.relatedTarget && e.relatedTarget === self.anchorInput ) {
                 return true;
             }
             return false;
@@ -629,8 +629,13 @@ if (typeof module === 'object') {
                 range = selection.getRangeAt(0),
                 boundary = range.getBoundingClientRect();
 
+            if (e.target.nodeName == "SELECT"){
+                this.hideToolbarActions();
+                return this;
+            }
+
             //if nothing is selected, draw the toolbar at cursor
-            if (range.endOffset - range.startOffset == 0 && range.collapsed == true) {
+            if (range.endOffset - range.startOffset == 0 && range.collapsed == true && e.target.nodeName != "SELECT") {
 
                 //first, inject a span at the caret
                 pasteHtmlAtCaret('<span id="positionOfCaret"></span>');
@@ -643,10 +648,6 @@ if (typeof module === 'object') {
                 //now remove the injected span
                 document.getElementById('positionOfCaret').remove();
             }
-
-            // if(boundary.left === 0 && boundary.right === 0 ) {
-            //     boundary = {bottom: e.y, height: 20, left: e.x, right: e.x, top: e.y, width: 1};
-            // }
 
             var defaultLeft = (this.options.diffLeft) - (this.toolbar.offsetWidth / 2),
                 middleBoundary = (boundary.left + boundary.right) / 2,
