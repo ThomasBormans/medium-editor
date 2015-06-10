@@ -369,7 +369,8 @@ if (typeof module === 'object') {
                     'indent': '<button class="medium-editor-action medium-editor-action-indent" data-action="indent" data-element="ul">' + buttonLabels.indent + '</button>',
                     'outdent': '<button class="medium-editor-action medium-editor-action-outdent" data-action="outdent" data-element="ul">' + buttonLabels.outdent + '</button>',
                     'contact': '<button class="medium-editor-action medium-editor-action-contact" data-action="contact" data-element="img">' + buttonLabels.contact + '</button>',
-                    'movie': '<button class="medium-editor-action medium-editor-action-movie" data-action="movie" data-element="img">' + buttonLabels.movie + '</button>'
+                    'movie': '<button class="medium-editor-action medium-editor-action-movie" data-action="movie" data-element="img">' + buttonLabels.movie + '</button>',
+                    'delijn': '<button class="medium-editor-action medium-editor-action-delijn" data-action="delijn" data-element="img">' + buttonLabels.delijn + '</button>'
                 };
             return buttonTemplates[btnType] || false;
         },
@@ -395,7 +396,8 @@ if (typeof module === 'object') {
                     'indent': '<b>&rarr;</b>',
                     'outdent': '<b>&larr;</b>',
                     'contact': '<b>contact</b>',
-                    'movie': '<b>movie</b>'
+                    'movie': '<b>movie</b>',
+                    'delijn': '<b>De Lijn</b>'
                 };
             if (buttonLabelType === 'fontawesome') {
                 customButtonLabels = {
@@ -413,7 +415,8 @@ if (typeof module === 'object') {
                     'indent': '<i class="fa fa-indent"></i>',
                     'outdent': '<i class="fa fa-outdent"></i>',
                     'contact': '<i class="fa fa-phone"></i>',
-                    'movie': '<i class="fa fa-film"></i>'
+                    'movie': '<i class="fa fa-film"></i>',
+                    'De Lijn': '<i class="fa fa-bus"></i>'
                 };
             } else if (typeof buttonLabelType === 'object') {
                 customButtonLabels = buttonLabelType;
@@ -753,6 +756,8 @@ if (typeof module === 'object') {
                 document.execCommand('insertHtml', null, '[CONTACT]');
             } else if (action === 'movie') {
                 document.execCommand('insertHtml', null, '[MOVIE]');
+            } else if (action === 'delijn') {
+                document.execCommand('insertHtml', null, '[DELIJN]');
             } else {
                 document.execCommand(action, false, null);
                 this.setToolbarPosition();
