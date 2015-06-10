@@ -7,6 +7,7 @@ if (typeof module === 'object') {
     module.exports = MediumEditor;
 }
 
+
 (function (window, document) {
     'use strict';
 
@@ -90,6 +91,47 @@ if (typeof module === 'object') {
         return !!(obj && obj.nodeType === 1);
     }
 
+    //http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div
+    function pasteHtmlAtCaret(html) {
+        var sel, range;
+        if (window.getSelection) {
+            // IE9 and non-IE
+            sel = window.getSelection();
+            
+            if (sel.getRangeAt && sel.rangeCount) {
+                range = sel.getRangeAt(0);
+
+                if (sel.type != "Range"){
+                    range.deleteContents();
+                }
+
+                
+                // Range.createContextualFragment() would be useful here but is
+                // non-standard and not supported in all browsers (IE9, for one)
+                var el = document.createElement("div");
+                el.innerHTML = html;
+                var frag = document.createDocumentFragment(), node, lastNode;
+                while ( (node = el.firstChild) ) {
+                    lastNode = frag.appendChild(node);
+                }
+                range.insertNode(frag);
+                
+                // Preserve the selection
+                if (lastNode) {
+                    range = range.cloneRange();
+                    range.setStartAfter(lastNode);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }
+        } else if (document.selection && document.selection.type != "Control") {
+            // IE < 9
+            document.selection.createRange().pasteHTML(html);
+        }
+    }
+
+
     MediumEditor.prototype = {
         defaults: {
             allowMultiParagraphSelection: true,
@@ -101,7 +143,7 @@ if (typeof module === 'object') {
             cleanPastedHTML: false,
             delay: 0,
             diffLeft: 0,
-            diffTop: -10,
+            diffTop: -15,
             disableReturn: false,
             disableDoubleReturn: false,
             disableToolbar: false,
@@ -493,17 +535,24 @@ if (typeof module === 'object') {
         checkSelection: function (e) {
             var newSelection,
                 selectionElement;
-
             if (this.keepToolbarAlive !== true && !this.options.disableToolbar) {
                 newSelection = window.getSelection();
                 // if (newSelection.toString().trim() === '' ||
                 //     (this.options.allowMultiParagraphSelection === false && this.hasMultiParagraphs())) {
                     // this.hideToolbarActions();
                 // } else {
+
                 selectionElement = this.getSelectionElement();
                 if (!selectionElement || selectionElement.getAttribute('data-disable-toolbar')) {
                     this.hideToolbarActions();
-                } else {
+                } 
+
+                //if no text in newSelection, don't show the toolbar
+                // else if (newSelection.focusNode.nodeValue == null) {
+                //     this.hideToolbarActions();
+                // }
+
+                else {
                     this.checkSelectionElement(newSelection, selectionElement, e);
                 }
                 // }
@@ -513,7 +562,7 @@ if (typeof module === 'object') {
 
         clickingIntoArchorForm: function (e) {
             var self = this;
-            if (e.type && e.type.toLowerCase() === 'blur' && e.relatedTarget && e.relatedTarget === self.anchorInput) {
+            if (e.type && e.type.toLowerCase() === 'blur' && e.relatedTarget && e.relatedTarget === self.anchorInput ) {
                 return true;
             }
             return false;
@@ -579,9 +628,27 @@ if (typeof module === 'object') {
                 selection = window.getSelection(),
                 range = selection.getRangeAt(0),
                 boundary = range.getBoundingClientRect();
-            if(boundary.left === 0 && boundary.right === 0) {
-                boundary = {bottom: e.y, height: 20, left: e.x, right: e.x, top: e.y, width: 1};
+
+            if (e.target.nodeName == "SELECT"){
+                this.hideToolbarActions();
+                return this;
             }
+
+            //if nothing is selected, draw the toolbar at cursor
+            if (range.endOffset - range.startOffset == 0 && range.collapsed == true && e.target.nodeName != "SELECT") {
+
+                //first, inject a span at the caret
+                pasteHtmlAtCaret('<span id="positionOfCaret"></span>');
+
+                //now get X and Y position of that span & set as boundary
+                var posEl = document.getElementById('positionOfCaret');
+                var posElBoundary = posEl.getBoundingClientRect();
+                boundary = {bottom: posElBoundary.bottom, left: posElBoundary.left, right: posElBoundary.right, top: posElBoundary.top, width: 1};
+                
+                //now remove the injected span
+                document.getElementById('positionOfCaret').remove();
+            }
+
             var defaultLeft = (this.options.diffLeft) - (this.toolbar.offsetWidth / 2),
                 middleBoundary = (boundary.left + boundary.right) / 2,
                 halfOffsetWidth = this.toolbar.offsetWidth / 2;
