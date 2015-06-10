@@ -97,7 +97,7 @@ if (typeof module === 'object') {
         if (window.getSelection) {
             // IE9 and non-IE
             sel = window.getSelection();
-            
+
             if (sel.getRangeAt && sel.rangeCount) {
                 range = sel.getRangeAt(0);
 
@@ -105,7 +105,7 @@ if (typeof module === 'object') {
                     range.deleteContents();
                 }
 
-                
+
                 // Range.createContextualFragment() would be useful here but is
                 // non-standard and not supported in all browsers (IE9, for one)
                 var el = document.createElement("div");
@@ -115,7 +115,7 @@ if (typeof module === 'object') {
                     lastNode = frag.appendChild(node);
                 }
                 range.insertNode(frag);
-                
+
                 // Preserve the selection
                 if (lastNode) {
                     range = range.cloneRange();
@@ -548,7 +548,7 @@ if (typeof module === 'object') {
                 selectionElement = this.getSelectionElement();
                 if (!selectionElement || selectionElement.getAttribute('data-disable-toolbar')) {
                     this.hideToolbarActions();
-                } 
+                }
 
                 //if no text in newSelection, don't show the toolbar
                 // else if (newSelection.focusNode.nodeValue == null) {
@@ -647,7 +647,7 @@ if (typeof module === 'object') {
                 var posEl = document.getElementById('positionOfCaret');
                 var posElBoundary = posEl.getBoundingClientRect();
                 boundary = {bottom: posElBoundary.bottom, left: posElBoundary.left, right: posElBoundary.right, top: posElBoundary.top, width: 1};
-                
+
                 //now remove the injected span
                 document.getElementById('positionOfCaret').remove();
             }
