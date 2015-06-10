@@ -137,7 +137,7 @@ if (typeof module === 'object') {
             allowMultiParagraphSelection: true,
             anchorInputPlaceholder: 'Paste or type a link',
             anchorPreviewHideDelay: 500,
-            buttons: ['bold', 'italic', 'underline', 'anchor', 'header1', 'header2', 'quote', 'contact', 'movie'],
+            buttons: ['bold', 'italic', 'underline', 'anchor', 'header1', 'header2', 'quote', 'delijn'],
             buttonLabels: false,
             checkLinkFormat: false,
             cleanPastedHTML: false,
