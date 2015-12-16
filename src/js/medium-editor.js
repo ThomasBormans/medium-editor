@@ -330,6 +330,7 @@ if (typeof module === 'object') {
                 'outdent': '<button class="medium-editor-action medium-editor-action-outdent" data-action="outdent" data-element="ul">' + buttonLabels.outdent + '</button>',
                 'contact': '<button class="medium-editor-action medium-editor-action-contact" data-action="contact" data-element="img">' + buttonLabels.contact + '</button>',
                 'movie': '<button class="medium-editor-action medium-editor-action-movie" data-action="movie" data-element="img">' + buttonLabels.movie + '</button>',
+                'video': '<button class="medium-editor-action medium-editor-action-video" data-action="video" data-element="img">' + buttonLabels.video + '</button>',
                 'delijn': '<button class="medium-editor-action medium-editor-action-delijn" data-action="delijn" data-element="img">' + buttonLabels.delijn + '</button>'
             };
             return buttonTemplates[btnType] || false;
