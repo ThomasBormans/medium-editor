@@ -3,11 +3,6 @@ function MediumEditor(elements, options) {
     return this.init(elements, options);
 }
 
-if (typeof module === 'object') {
-    module.exports = MediumEditor;
-}
-
-
 (function (window, document) {
     'use strict';
 
@@ -93,7 +88,7 @@ if (typeof module === 'object') {
 
     //http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div
     function pasteHtmlAtCaret(html) {
-        var sel, range;
+        var sel, range, el, frag, node, lastNode;
         if (window.getSelection) {
             // IE9 and non-IE
             sel = window.getSelection();
@@ -101,18 +96,20 @@ if (typeof module === 'object') {
             if (sel.getRangeAt && sel.rangeCount) {
                 range = sel.getRangeAt(0);
 
-                if (sel.type != "Range"){
+                if (sel.type !== "Range"){
                     range.deleteContents();
                 }
 
 
                 // Range.createContextualFragment() would be useful here but is
                 // non-standard and not supported in all browsers (IE9, for one)
-                var el = document.createElement("div");
+                el = document.createElement("div");
                 el.innerHTML = html;
-                var frag = document.createDocumentFragment(), node, lastNode;
-                while ( (node = el.firstChild) ) {
+                frag = document.createDocumentFragment();
+                node = el.firstChild;
+                while (node) {
                     lastNode = frag.appendChild(node);
+                    node = el.firstChild;
                 }
                 range.insertNode(frag);
 
@@ -125,7 +122,7 @@ if (typeof module === 'object') {
                     sel.addRange(range);
                 }
             }
-        } else if (document.selection && document.selection.type != "Control") {
+        } else if (document.selection && document.selection.type !== "Control") {
             // IE < 9
             document.selection.createRange().pasteHTML(html);
         }
@@ -370,6 +367,7 @@ if (typeof module === 'object') {
                     'outdent': '<button class="medium-editor-action medium-editor-action-outdent" data-action="outdent" data-element="ul">' + buttonLabels.outdent + '</button>',
                     'contact': '<button class="medium-editor-action medium-editor-action-contact" data-action="contact" data-element="img">' + buttonLabels.contact + '</button>',
                     'movie': '<button class="medium-editor-action medium-editor-action-movie" data-action="movie" data-element="img">' + buttonLabels.movie + '</button>',
+                    'video': '<button class="medium-editor-action medium-editor-action-video" data-action="video" data-element="img">' + buttonLabels.video + '</button>',
                     'delijn': '<button class="medium-editor-action medium-editor-action-delijn" data-action="delijn" data-element="img">' + buttonLabels.delijn + '</button>'
                 };
             return buttonTemplates[btnType] || false;
@@ -397,6 +395,7 @@ if (typeof module === 'object') {
                     'outdent': '<b>&larr;</b>',
                     'contact': '<b>contact</b>',
                     'movie': '<b>movie</b>',
+                    'video': '<b>VIDEO</b>',
                     'delijn': '<b>De Lijn</b>'
                 };
             if (buttonLabelType === 'fontawesome') {
@@ -416,6 +415,7 @@ if (typeof module === 'object') {
                     'outdent': '<i class="fa fa-outdent"></i>',
                     'contact': '<i class="fa fa-phone"></i>',
                     'movie': '<i class="fa fa-film"></i>',
+                    'video': '<i class="fa fa-film"></i>',
                     'De Lijn': '<i class="fa fa-bus"></i>'
                 };
             } else if (typeof buttonLabelType === 'object') {
@@ -538,6 +538,7 @@ if (typeof module === 'object') {
         checkSelection: function (e) {
             var newSelection,
                 selectionElement;
+
             if (this.keepToolbarAlive !== true && !this.options.disableToolbar) {
                 newSelection = window.getSelection();
                 // if (newSelection.toString().trim() === '' ||
@@ -630,31 +631,33 @@ if (typeof module === 'object') {
             var buttonHeight = 50,
                 selection = window.getSelection(),
                 range = selection.getRangeAt(0),
-                boundary = range.getBoundingClientRect();
+                boundary = range.getBoundingClientRect(),
+                defaultLeft = (this.options.diffLeft) - (this.toolbar.offsetWidth / 2),
+                middleBoundary = (boundary.left + boundary.right) / 2,
+                halfOffsetWidth = this.toolbar.offsetWidth / 2,
+                posEl,
+                posElBoundary;
 
-            if (e.target.nodeName == "SELECT"){
+            if (e.target.nodeName === "SELECT"){
                 this.hideToolbarActions();
                 return this;
             }
 
             //if nothing is selected, draw the toolbar at cursor
-            if (range.endOffset - range.startOffset == 0 && range.collapsed == true && e.target.nodeName != "SELECT") {
+            if (range.endOffset - range.startOffset === 0 && range.collapsed === true && e.target.nodeName !== "SELECT") {
 
                 //first, inject a span at the caret
                 pasteHtmlAtCaret('<span id="positionOfCaret"></span>');
 
                 //now get X and Y position of that span & set as boundary
-                var posEl = document.getElementById('positionOfCaret');
-                var posElBoundary = posEl.getBoundingClientRect();
+                posEl = document.getElementById('positionOfCaret');
+                posElBoundary = posEl.getBoundingClientRect();
                 boundary = {bottom: posElBoundary.bottom, left: posElBoundary.left, right: posElBoundary.right, top: posElBoundary.top, width: 1};
 
                 //now remove the injected span
                 document.getElementById('positionOfCaret').remove();
             }
 
-            var defaultLeft = (this.options.diffLeft) - (this.toolbar.offsetWidth / 2),
-                middleBoundary = (boundary.left + boundary.right) / 2,
-                halfOffsetWidth = this.toolbar.offsetWidth / 2;
             if (boundary.top < buttonHeight) {
                 this.toolbar.classList.add('medium-toolbar-arrow-over');
                 this.toolbar.classList.remove('medium-toolbar-arrow-under');
@@ -756,6 +759,8 @@ if (typeof module === 'object') {
                 document.execCommand('insertHtml', null, '[CONTACT]');
             } else if (action === 'movie') {
                 document.execCommand('insertHtml', null, '[MOVIE]');
+            } else if (action === 'video') {
+                document.execCommand('insertHtml', null, '[VIDEO]');
             } else if (action === 'delijn') {
                 document.execCommand('insertHtml', null, '[DELIJN]');
             } else {
@@ -910,7 +915,7 @@ if (typeof module === 'object') {
             });
             this.anchorInput.addEventListener('blur', function () {
                 self.keepToolbarAlive = false;
-                self.checkSelection(null);
+                self.checkSelection();
             });
             linkCancel.addEventListener('click', function (e) {
                 e.preventDefault();

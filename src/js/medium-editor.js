@@ -1,12 +1,6 @@
-/*global module, console*/
-
 function MediumEditor(elements, options) {
     'use strict';
     return this.init(elements, options);
-}
-
-if (typeof module === 'object') {
-    module.exports = MediumEditor;
 }
 
 (function (window, document) {
@@ -92,18 +86,61 @@ if (typeof module === 'object') {
         return !!(obj && obj.nodeType === 1);
     }
 
+    //http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div
+    function pasteHtmlAtCaret(html) {
+        var sel, range, el, frag, node, lastNode;
+        if (window.getSelection) {
+            // IE9 and non-IE
+            sel = window.getSelection();
+
+            if (sel.getRangeAt && sel.rangeCount) {
+                range = sel.getRangeAt(0);
+
+                if (sel.type !== "Range"){
+                    range.deleteContents();
+                }
+
+
+                // Range.createContextualFragment() would be useful here but is
+                // non-standard and not supported in all browsers (IE9, for one)
+                el = document.createElement("div");
+                el.innerHTML = html;
+                frag = document.createDocumentFragment();
+                node = el.firstChild;
+                while (node) {
+                    lastNode = frag.appendChild(node);
+                    node = el.firstChild;
+                }
+                range.insertNode(frag);
+
+                // Preserve the selection
+                if (lastNode) {
+                    range = range.cloneRange();
+                    range.setStartAfter(lastNode);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }
+        } else if (document.selection && document.selection.type !== "Control") {
+            // IE < 9
+            document.selection.createRange().pasteHTML(html);
+        }
+    }
+
+
     MediumEditor.prototype = {
         defaults: {
             allowMultiParagraphSelection: true,
             anchorInputPlaceholder: 'Paste or type a link',
             anchorPreviewHideDelay: 500,
-            buttons: ['bold', 'italic', 'underline', 'anchor', 'header1', 'header2', 'quote'],
+            buttons: ['bold', 'italic', 'underline', 'anchor', 'header1', 'header2', 'quote', 'delijn'],
             buttonLabels: false,
             checkLinkFormat: false,
             cleanPastedHTML: false,
             delay: 0,
             diffLeft: 0,
-            diffTop: -10,
+            diffTop: -15,
             disableReturn: false,
             disableDoubleReturn: false,
             disableToolbar: false,
@@ -327,7 +364,11 @@ if (typeof module === 'object') {
                     'unorderedlist': '<button class="medium-editor-action medium-editor-action-unorderedlist" data-action="insertunorderedlist" data-element="ul">' + buttonLabels.unorderedlist + '</button>',
                     'pre': '<button class="medium-editor-action medium-editor-action-pre" data-action="append-pre" data-element="pre">' + buttonLabels.pre + '</button>',
                     'indent': '<button class="medium-editor-action medium-editor-action-indent" data-action="indent" data-element="ul">' + buttonLabels.indent + '</button>',
-                    'outdent': '<button class="medium-editor-action medium-editor-action-outdent" data-action="outdent" data-element="ul">' + buttonLabels.outdent + '</button>'
+                    'outdent': '<button class="medium-editor-action medium-editor-action-outdent" data-action="outdent" data-element="ul">' + buttonLabels.outdent + '</button>',
+                    'contact': '<button class="medium-editor-action medium-editor-action-contact" data-action="contact" data-element="img">' + buttonLabels.contact + '</button>',
+                    'movie': '<button class="medium-editor-action medium-editor-action-movie" data-action="movie" data-element="img">' + buttonLabels.movie + '</button>',
+                    'video': '<button class="medium-editor-action medium-editor-action-video" data-action="video" data-element="img">' + buttonLabels.video + '</button>',
+                    'delijn': '<button class="medium-editor-action medium-editor-action-delijn" data-action="delijn" data-element="img">' + buttonLabels.delijn + '</button>'
                 };
             return buttonTemplates[btnType] || false;
         },
@@ -351,7 +392,11 @@ if (typeof module === 'object') {
                     'unorderedlist': '<b>&bull;</b>',
                     'pre': '<b>0101</b>',
                     'indent': '<b>&rarr;</b>',
-                    'outdent': '<b>&larr;</b>'
+                    'outdent': '<b>&larr;</b>',
+                    'contact': '<b>contact</b>',
+                    'movie': '<b>movie</b>',
+                    'video': '<b>VIDEO</b>',
+                    'delijn': '<b>De Lijn</b>'
                 };
             if (buttonLabelType === 'fontawesome') {
                 customButtonLabels = {
@@ -367,7 +412,11 @@ if (typeof module === 'object') {
                     'unorderedlist': '<i class="fa fa-list-ul"></i>',
                     'pre': '<i class="fa fa-code fa-lg"></i>',
                     'indent': '<i class="fa fa-indent"></i>',
-                    'outdent': '<i class="fa fa-outdent"></i>'
+                    'outdent': '<i class="fa fa-outdent"></i>',
+                    'contact': '<i class="fa fa-phone"></i>',
+                    'movie': '<i class="fa fa-film"></i>',
+                    'video': '<i class="fa fa-film"></i>',
+                    'De Lijn': '<i class="fa fa-bus"></i>'
                 };
             } else if (typeof buttonLabelType === 'object') {
                 customButtonLabels = buttonLabelType;
@@ -473,7 +522,7 @@ if (typeof module === 'object') {
 
                 clearTimeout(timer);
                 timer = setTimeout(function () {
-                    self.checkSelection();
+                    self.checkSelection(e);
                 }, self.options.delay);
             };
 
@@ -486,30 +535,38 @@ if (typeof module === 'object') {
             return this;
         },
 
-        checkSelection: function () {
+        checkSelection: function (e) {
             var newSelection,
                 selectionElement;
 
             if (this.keepToolbarAlive !== true && !this.options.disableToolbar) {
                 newSelection = window.getSelection();
-                if (newSelection.toString().trim() === '' ||
-                    (this.options.allowMultiParagraphSelection === false && this.hasMultiParagraphs())) {
+                // if (newSelection.toString().trim() === '' ||
+                //     (this.options.allowMultiParagraphSelection === false && this.hasMultiParagraphs())) {
+                    // this.hideToolbarActions();
+                // } else {
+
+                selectionElement = this.getSelectionElement();
+                if (!selectionElement || selectionElement.getAttribute('data-disable-toolbar')) {
                     this.hideToolbarActions();
-                } else {
-                    selectionElement = this.getSelectionElement();
-                    if (!selectionElement || selectionElement.getAttribute('data-disable-toolbar')) {
-                        this.hideToolbarActions();
-                    } else {
-                        this.checkSelectionElement(newSelection, selectionElement);
-                    }
                 }
+
+                //if no text in newSelection, don't show the toolbar
+                // else if (newSelection.focusNode.nodeValue == null) {
+                //     this.hideToolbarActions();
+                // }
+
+                else {
+                    this.checkSelectionElement(newSelection, selectionElement, e);
+                }
+                // }
             }
             return this;
         },
 
         clickingIntoArchorForm: function (e) {
             var self = this;
-            if (e.type && e.type.toLowerCase() === 'blur' && e.relatedTarget && e.relatedTarget === self.anchorInput) {
+            if (e.type && e.type.toLowerCase() === 'blur' && e.relatedTarget && e.relatedTarget === self.anchorInput ) {
                 return true;
             }
             return false;
@@ -522,14 +579,14 @@ if (typeof module === 'object') {
             return (hasMultiParagraphs ? hasMultiParagraphs.length : 0);
         },
 
-        checkSelectionElement: function (newSelection, selectionElement) {
+        checkSelectionElement: function (newSelection, selectionElement, e) {
             var i;
             this.selection = newSelection;
             this.selectionRange = this.selection.getRangeAt(0);
             for (i = 0; i < this.elements.length; i += 1) {
                 if (this.elements[i] === selectionElement) {
                     this.setToolbarButtonStates()
-                        .setToolbarPosition()
+                        .setToolbarPosition(e)
                         .showToolbarActions();
                     return;
                 }
@@ -570,14 +627,37 @@ if (typeof module === 'object') {
             return result;
         },
 
-        setToolbarPosition: function () {
+        setToolbarPosition: function (e) {
             var buttonHeight = 50,
                 selection = window.getSelection(),
                 range = selection.getRangeAt(0),
                 boundary = range.getBoundingClientRect(),
                 defaultLeft = (this.options.diffLeft) - (this.toolbar.offsetWidth / 2),
                 middleBoundary = (boundary.left + boundary.right) / 2,
-                halfOffsetWidth = this.toolbar.offsetWidth / 2;
+                halfOffsetWidth = this.toolbar.offsetWidth / 2,
+                posEl,
+                posElBoundary;
+
+            if (e.target.nodeName === "SELECT"){
+                this.hideToolbarActions();
+                return this;
+            }
+
+            //if nothing is selected, draw the toolbar at cursor
+            if (range.endOffset - range.startOffset === 0 && range.collapsed === true && e.target.nodeName !== "SELECT") {
+
+                //first, inject a span at the caret
+                pasteHtmlAtCaret('<span id="positionOfCaret"></span>');
+
+                //now get X and Y position of that span & set as boundary
+                posEl = document.getElementById('positionOfCaret');
+                posElBoundary = posEl.getBoundingClientRect();
+                boundary = {bottom: posElBoundary.bottom, left: posElBoundary.left, right: posElBoundary.right, top: posElBoundary.top, width: 1};
+
+                //now remove the injected span
+                document.getElementById('positionOfCaret').remove();
+            }
+
             if (boundary.top < buttonHeight) {
                 this.toolbar.classList.add('medium-toolbar-arrow-over');
                 this.toolbar.classList.remove('medium-toolbar-arrow-under');
@@ -640,7 +720,7 @@ if (typeof module === 'object') {
                     e.preventDefault();
                     e.stopPropagation();
                     if (self.selection === undefined) {
-                        self.checkSelection();
+                        self.checkSelection(e);
                     }
                     if (this.className.indexOf(self.options.activeButtonClass) > -1) {
                         this.classList.remove(self.options.activeButtonClass);
@@ -675,6 +755,14 @@ if (typeof module === 'object') {
                 this.triggerAnchorAction(e);
             } else if (action === 'image') {
                 document.execCommand('insertImage', false, window.getSelection());
+            } else if (action === 'contact') {
+                document.execCommand('insertHtml', null, '[CONTACT]');
+            } else if (action === 'movie') {
+                document.execCommand('insertHtml', null, '[MOVIE]');
+            } else if (action === 'video') {
+                document.execCommand('insertHtml', null, '[VIDEO]');
+            } else if (action === 'delijn') {
+                document.execCommand('insertHtml', null, '[DELIJN]');
             } else {
                 document.execCommand(action, false, null);
                 this.setToolbarPosition();
@@ -1045,7 +1133,7 @@ if (typeof module === 'object') {
             if (this.options.targetBlank) {
                 this.setTargetBlank();
             }
-            this.checkSelection();
+            this.checkSelection(null);
             this.showToolbarActions();
             input.value = '';
         },
