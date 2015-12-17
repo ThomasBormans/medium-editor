@@ -629,55 +629,55 @@ function MediumEditor(elements, options) {
 
         setToolbarPosition: function (e) {
             var buttonHeight = 50,
-                selection = window.getSelection(),
-                range = selection.getRangeAt(0),
-                boundary = range.getBoundingClientRect(),
-                defaultLeft = (this.options.diffLeft) - (this.toolbar.offsetWidth / 2),
-                middleBoundary = (boundary.left + boundary.right) / 2,
-                halfOffsetWidth = this.toolbar.offsetWidth / 2,
-                posEl,
-                posElBoundary;
+               selection = window.getSelection(),
+               range = selection.getRangeAt(0),
+               boundary = range.getBoundingClientRect(),
+               posEl, posElBoundary,
+               defaultLeft, middleBoundary, halfOffsetWidth;
 
-            if (e.target.nodeName === "SELECT"){
-                this.hideToolbarActions();
-                return this;
-            }
+           if (e.target.nodeName === "SELECT"){
+               this.hideToolbarActions();
+               return this;
+           }
 
-            //if nothing is selected, draw the toolbar at cursor
-            if (range.endOffset - range.startOffset === 0 && range.collapsed === true && e.target.nodeName !== "SELECT") {
+           //if nothing is selected, draw the toolbar at cursor
+           if (range.endOffset - range.startOffset === 0 && range.collapsed === true && e.target.nodeName !== "SELECT") {
 
-                //first, inject a span at the caret
-                pasteHtmlAtCaret('<span id="positionOfCaret"></span>');
+               //first, inject a span at the caret
+               pasteHtmlAtCaret('<span id="positionOfCaret"></span>');
 
-                //now get X and Y position of that span & set as boundary
-                posEl = document.getElementById('positionOfCaret');
-                posElBoundary = posEl.getBoundingClientRect();
-                boundary = {bottom: posElBoundary.bottom, left: posElBoundary.left, right: posElBoundary.right, top: posElBoundary.top, width: 1};
+               //now get X and Y position of that span & set as boundary
+               posEl = document.getElementById('positionOfCaret');
+               posElBoundary = posEl.getBoundingClientRect();
+               boundary = {bottom: posElBoundary.bottom, left: posElBoundary.left, right: posElBoundary.right, top: posElBoundary.top, width: 1};
 
-                //now remove the injected span
-                document.getElementById('positionOfCaret').remove();
-            }
+               //now remove the injected span
+               document.getElementById('positionOfCaret').remove();
+           }
 
-            if (boundary.top < buttonHeight) {
-                this.toolbar.classList.add('medium-toolbar-arrow-over');
-                this.toolbar.classList.remove('medium-toolbar-arrow-under');
-                this.toolbar.style.top = buttonHeight + boundary.bottom - this.options.diffTop + window.pageYOffset - this.toolbar.offsetHeight + 'px';
-            } else {
-                this.toolbar.classList.add('medium-toolbar-arrow-under');
-                this.toolbar.classList.remove('medium-toolbar-arrow-over');
-                this.toolbar.style.top = boundary.top + this.options.diffTop + window.pageYOffset - this.toolbar.offsetHeight + 'px';
-            }
-            if (middleBoundary < halfOffsetWidth) {
-                this.toolbar.style.left = defaultLeft + halfOffsetWidth + 'px';
-            } else if ((window.innerWidth - middleBoundary) < halfOffsetWidth) {
-                this.toolbar.style.left = window.innerWidth + defaultLeft - halfOffsetWidth + 'px';
-            } else {
-                this.toolbar.style.left = defaultLeft + middleBoundary + 'px';
-            }
+           defaultLeft = (this.options.diffLeft) - (this.toolbar.offsetWidth / 2);
+           middleBoundary = (boundary.left + boundary.right) / 2;
+           halfOffsetWidth = this.toolbar.offsetWidth / 2;
+           if (boundary.top < buttonHeight) {
+               this.toolbar.classList.add('medium-toolbar-arrow-over');
+               this.toolbar.classList.remove('medium-toolbar-arrow-under');
+               this.toolbar.style.top = buttonHeight + boundary.bottom - this.options.diffTop + window.pageYOffset - this.toolbar.offsetHeight + 'px';
+           } else {
+               this.toolbar.classList.add('medium-toolbar-arrow-under');
+               this.toolbar.classList.remove('medium-toolbar-arrow-over');
+               this.toolbar.style.top = boundary.top + this.options.diffTop + window.pageYOffset - this.toolbar.offsetHeight + 'px';
+           }
+           if (middleBoundary < halfOffsetWidth) {
+               this.toolbar.style.left = defaultLeft + halfOffsetWidth + 'px';
+           } else if ((window.innerWidth - middleBoundary) < halfOffsetWidth) {
+               this.toolbar.style.left = window.innerWidth + defaultLeft - halfOffsetWidth + 'px';
+           } else {
+               this.toolbar.style.left = defaultLeft + middleBoundary + 'px';
+           }
 
-            this.hideAnchorPreview();
+           this.hideAnchorPreview();
 
-            return this;
+           return this;
         },
 
         setToolbarButtonStates: function () {
@@ -749,7 +749,7 @@ function MediumEditor(elements, options) {
         execAction: function (action, e) {
             if (action.indexOf('append-') > -1) {
                 this.execFormatBlock(action.replace('append-', ''));
-                this.setToolbarPosition();
+                this.setToolbarPosition(e);
                 this.setToolbarButtonStates();
             } else if (action === 'anchor') {
                 this.triggerAnchorAction(e);
@@ -765,7 +765,7 @@ function MediumEditor(elements, options) {
                 document.execCommand('insertHtml', null, '[DELIJN]');
             } else {
                 document.execCommand(action, false, null);
-                this.setToolbarPosition();
+                this.setToolbarPosition(e);
             }
         },
 
