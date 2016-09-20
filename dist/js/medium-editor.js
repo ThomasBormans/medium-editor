@@ -368,6 +368,7 @@ function MediumEditor(elements, options) {
                     'contact': '<button class="medium-editor-action medium-editor-action-contact" data-action="contact" data-element="img">' + buttonLabels.contact + '</button>',
                     'movie': '<button class="medium-editor-action medium-editor-action-movie" data-action="movie" data-element="img">' + buttonLabels.movie + '</button>',
                     'video': '<button class="medium-editor-action medium-editor-action-video" data-action="video" data-element="img">' + buttonLabels.video + '</button>',
+                    'map': '<button class="medium-editor-action medium-editor-action-map" data-action="map" data-element="div">' + buttonLabels.map + '</button>',
                     'delijn': '<button class="medium-editor-action medium-editor-action-delijn" data-action="delijn" data-element="img">' + buttonLabels.delijn + '</button>'
                 };
             return buttonTemplates[btnType] || false;
@@ -396,6 +397,7 @@ function MediumEditor(elements, options) {
                     'contact': '<b>contact</b>',
                     'movie': '<b>movie</b>',
                     'video': '<b>VIDEO</b>',
+                    'map': '<b>map</b>',
                     'delijn': '<b>De Lijn</b>'
                 };
             if (buttonLabelType === 'fontawesome') {
@@ -416,6 +418,7 @@ function MediumEditor(elements, options) {
                     'contact': '<i class="fa fa-phone"></i>',
                     'movie': '<i class="fa fa-film"></i>',
                     'video': '<i class="fa fa-film"></i>',
+                    'map': '<i class="fa fa-map-marker"></i>',
                     'De Lijn': '<i class="fa fa-bus"></i>'
                 };
             } else if (typeof buttonLabelType === 'object') {
@@ -761,6 +764,8 @@ function MediumEditor(elements, options) {
                 document.execCommand('insertHtml', null, '[MOVIE]');
             } else if (action === 'video') {
                 document.execCommand('insertHtml', null, '[VIDEO]');
+            } else if (action === 'map') {
+                document.execCommand('insertHtml', null, '[MAP]');
             } else if (action === 'delijn') {
                 document.execCommand('insertHtml', null, '[DELIJN]');
             } else {
